@@ -1,0 +1,27 @@
+{
+  "name": "anky",
+  "version": "1.0.0",
+  "description": "A skeletal animation editor.",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development webpack-dev-server",
+    "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
+  },
+  "author": "Andre Belzile (andre.belzile@gmail.com)",
+  "license": "MIT",
+  "devDependencies": {
+    "cross-env": "^5.1.1",
+    "css-loader": "^0.28.7",
+    "file-loader": "^1.1.5",
+    "pixi.js": "^4.6.0",
+    "uuid": "^3.1.0",
+    "vue-loader": "^13.3.0",
+    "vue-template-compiler": "^2.5.2",
+    "vue.js": "^0.3.2",
+    "vue2-simplert": "^0.7.1",
+    "vuex": "^3.0.1",
+    "webpack": "^3.8.1",
+    "webpack-dev-server": "^2.9.4"
+  }
+}
