@@ -11,6 +11,7 @@
   "author": "Andre Belzile (andre.belzile@gmail.com)",
   "license": "MIT",
   "devDependencies": {
+    "colorsys": "^1.0.20",
     "cross-env": "^5.1.1",
     "css-loader": "^0.28.7",
     "file-loader": "^1.1.5",

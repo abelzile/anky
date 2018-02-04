@@ -23,6 +23,7 @@
     cursor: pointer;
     padding: 3px;
     border-radius: 3px;
+    font-weight: normal;
   }
 
   .no-select {

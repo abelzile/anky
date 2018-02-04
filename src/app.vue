@@ -2,7 +2,7 @@
   <div>
     <tools :model="project"></tools>
     <div id="editor-main">
-      <editor></editor>
+      <editor :model="project"></editor>
     </div>
   </div>
 </template>

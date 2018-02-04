@@ -93,8 +93,8 @@
     border-width: 1px;
   }
 
-  #properties input.int-value {
-    width: 50px;
+  #properties input.num-value {
+    width: 100px;
   }
 
   #properties label.top-label {

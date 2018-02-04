@@ -20,7 +20,9 @@
       zoom,
       stages
     },
-    props: {},
+    props: {
+      model: Object
+    },
     data() {
       return {
         renderer: null,
@@ -35,7 +37,7 @@
     },
     computed: {
       stages() {
-        return this.$store.state.stages;
+        return this.model.stages;
       }
     },
     methods: {
@@ -129,23 +131,36 @@
         console.log('done');
       },
       _mutationSubscribe(mutation, state) {
-        switch (mutation.type) {
+        /*switch (mutation.type) {
           case MutationTypes.ADD_BONE:
           case MutationTypes.DELETE_BONE:
           case MutationTypes.SELECT_STAGE:
-          {
+          case MutationTypes.UPDATE_BONE_LENGTH:
+          case MutationTypes.UPDATE_SELECTED_BONE_TRANSFORM_X_POSITION:
+          case MutationTypes.UPDATE_SELECTED_BONE_TRANSFORM_Y_POSITION:
+          {*/
             this.boneContainer.removeChildren();
 
-            const rootBone = this.$store.state.rootBone;
+            const rootBone = this.model.rootBone;
             const allChildBones = rootBone.getAllChildBones();
-            allChildBones.forEach(bone => this.boneContainer.addChild(bone.pixiBone));
 
-            break;
+            allChildBones.forEach(this._updateBoneGraphics);
+
+            /*break;
           }
-        }
+        }*/
 
         this.invalidate();
         this.redraw();
+      },
+      _updateBoneGraphics(bone) {
+        const transform = this.model.selectedStage.currentFrame.getBoneTransform(bone);
+
+        console.log(transform);
+
+        const pixiBone = bone.pixiBone;
+        this.boneContainer.addChild(pixiBone);
+        bone.applyTransform(transform);
       }
     },
     mounted() {

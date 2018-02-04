@@ -11,10 +11,14 @@
         {{model.name}}
       </span>
       <span class="icons">
-        <boneTreeItemButton text="add" color="#fff" backgroundColor="#268bd2"
+        <boneTreeItemButton text="add"
+                            color="#fff"
+                            backgroundColor="#268bd2"
                             @click="addChild(model.id)"></boneTreeItemButton>
-        <boneTreeItemButton text="delete" color="#fff"
+        <boneTreeItemButton text="delete"
+                            color="#fff"
                             backgroundColor="#cb4b16"
+                            v-if="shouldRender(model)"
                             @click="deleteBone(model.id)"></boneTreeItemButton>
       </span>
     </div>
@@ -62,6 +66,9 @@
           return false;
         }
         return this.$store.state.selectedBone.id === this.model.id;
+      },
+      isRootBone() {
+        return !!this.$store.state.rootBone;
       }
     },
     methods: {
@@ -87,6 +94,9 @@
       },
       selectBone(boneId) {
         this.$store.commit(Types.SELECT_BONE, boneId);
+      },
+      shouldRender(model) {
+        return model !== this.$store.state.rootBone;
       }
     }
   }

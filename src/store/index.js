@@ -125,11 +125,18 @@ const mutations = {
     const bone = this.getters.getBoneById(payload.boneId);
     bone.length = payload.newLength;
   },
+  [Types.UPDATE_BONE_COLOR](state, payload) {
+    const bone = this.getters.getBoneById(payload.boneId);
+    bone.color = payload.newColor;
+  },
   [Types.UPDATE_SELECTED_BONE_TRANSFORM_X_POSITION](state, payload) {
     state.selectedStage.currentFrame.getBoneTransform(state.selectedBone).position.x = payload.x;
   },
   [Types.UPDATE_SELECTED_BONE_TRANSFORM_Y_POSITION](state, payload) {
     state.selectedStage.currentFrame.getBoneTransform(state.selectedBone).position.y = payload.y;
+  },
+  [Types.UPDATE_SELECTED_BONE_TRANSFORM_ROTATION](state, payload) {
+    state.selectedStage.currentFrame.getBoneTransform(state.selectedBone).rotation = payload.rotation;
   }
 };
 
