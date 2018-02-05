@@ -2,6 +2,7 @@ import * as generateUuidV4 from 'uuid/v4';
 import * as PIXI from 'pixi.js';
 import * as MathUtils from '../util/math-utils';
 import * as ColorUtils from '../util/color-utils';
+import Vector from '../vector';
 
 export default class Bone {
   constructor(name = '', length = 0) {
@@ -17,17 +18,13 @@ export default class Bone {
     this._updatePixiBone();
   }
 
-  get length() {
-    return this._length;
-  }
+  get length() { return this._length; }
   set length(val) {
     this._length = val;
     this._updatePixiBone();
   }
 
-  get color() {
-    return this._color;
-  }
+  get color() { return this._color; }
   set color(val) {
     this._color = val;
     this._updatePixiBone();
@@ -43,7 +40,18 @@ export default class Bone {
       childBone.name = 'New Bone ' + (this.childBones.length + 1);
     }
 
+    this.pixiBone.addChild(childBone.pixiBone);
     this.childBones.push(childBone);
+  }
+
+  removeChildBone(childBone) {
+    if (!childBone) {
+      throw new Error('childBone has no value.');
+    }
+    const index = childBone.parentBone.childBones.indexOf(childBone);
+    childBone.parentBone.childBones.splice(index, 1);
+    childBone.parentBone.pixiBone.removeChild(childBone.pixiBone);
+    childBone.parentBone = null;
   }
 
   getAllChildBones() {
@@ -62,12 +70,6 @@ export default class Bone {
     }
 
     return children;
-  }
-
-  applyTransform(transform) {
-    const pixiBone = this.pixiBone;
-    pixiBone.position.set(transform.position.x, transform.position.y);
-    pixiBone.rotation = MathUtils.degreesToRadians(transform.rotation);
   }
 
   _updatePixiBone() {

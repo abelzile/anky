@@ -93,11 +93,12 @@
         g.drawRect(x, y, width, height);
         g.endFill();
       },
-      _createBackground(bgContainer) {
+      _createBackground() {
         const TILE_SIZE = 32;
         let color1 = 0x93a1a1;
         let color2 = 0x839496;
-        const g = new PIXI.Graphics();
+        const g = new PIXI.Graphics(true);
+        const bgContainer = new PIXI.Container();
         bgContainer.addChild(g);
 
         const TILE_COUNT = 100;
@@ -128,39 +129,41 @@
         g.lineTo(0, -TILE_SIZE * TILE_COUNT);
         g.drawRect(-TILE_SIZE * TILE_COUNT, -TILE_SIZE * TILE_COUNT, TILE_SIZE * TILE_COUNT * 2, TILE_SIZE * TILE_COUNT * 2);
 
-        console.log('done');
+        return bgContainer;
       },
-      _mutationSubscribe(mutation, state) {
-        /*switch (mutation.type) {
-          case MutationTypes.ADD_BONE:
-          case MutationTypes.DELETE_BONE:
-          case MutationTypes.SELECT_STAGE:
-          case MutationTypes.UPDATE_BONE_LENGTH:
-          case MutationTypes.UPDATE_SELECTED_BONE_TRANSFORM_X_POSITION:
-          case MutationTypes.UPDATE_SELECTED_BONE_TRANSFORM_Y_POSITION:
-          {*/
-            this.boneContainer.removeChildren();
-
-            const rootBone = this.model.rootBone;
-            const allChildBones = rootBone.getAllChildBones();
-
-            allChildBones.forEach(this._updateBoneGraphics);
-
-            /*break;
-          }
-        }*/
+      _refreshBoneGraphics(mutation, state) {
+        //this.boneContainer.removeChildren();
+        //this.boneContainer.addChild(this.model.rootBone.pixiBone);
 
         this.invalidate();
         this.redraw();
       },
       _updateBoneGraphics(bone) {
-        const transform = this.model.selectedStage.currentFrame.getBoneTransform(bone);
-
-        console.log(transform);
-
-        const pixiBone = bone.pixiBone;
+        /*const pixiBone = bone.pixiBone;
         this.boneContainer.addChild(pixiBone);
+        const currentFrame = this.model.selectedStage.currentFrame;
+        const transform = currentFrame.getBoneTransform(bone);
         bone.applyTransform(transform);
+
+        for (const childBone of bone.childBones) {
+
+
+
+        }*/
+
+        /*const transforms = [];
+        const currentFrame = this.model.selectedStage.currentFrame;
+        let currentBone = bone;
+
+        while (currentBone) {
+          const transform = currentFrame.getBoneTransform(currentBone);
+
+          transforms.push(transform);
+
+          currentBone = currentBone.parentBone;
+        }
+
+        bone.applyTransforms(transforms);*/
       }
     },
     mounted() {
@@ -174,9 +177,7 @@
       renderer.view.style.display = 'block';
       renderer.resize(editor.offsetWidth, editor.offsetHeight);
 
-      const bgContainer = new PIXI.Container();
-      this._createBackground(bgContainer);
-      this.bgContainer = bgContainer;
+      this.bgContainer = this._createBackground();
       this.boneContainer = new PIXI.Container();
       this.rootContainer = new PIXI.Container();
       this.rootContainer.position.x = renderer.width / 2;
@@ -191,11 +192,12 @@
       this.spaceKey.press = function () {
       };*/
 
-      this.$store.subscribe(this._mutationSubscribe);
+      this.$store.subscribe(this._refreshBoneGraphics);
+
+      this.rootContainer.addChild(this.model.rootBone.pixiBone);
 
       Vue.nextTick(() => {
-        this.invalidate();
-        this.redraw();
+        this._refreshBoneGraphics();
       });
     }
   }

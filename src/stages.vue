@@ -38,7 +38,6 @@
     },
     methods: {
       update(e) {
-        console.log(e);
         this.$store.commit(Types.SELECT_STAGE, e.target.value);
       },
       pluralize(str) {

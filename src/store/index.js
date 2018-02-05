@@ -73,19 +73,14 @@ const mutations = {
   [Types.DELETE_BONE](state, boneId) {
     const boneToDelete = this.getters.getBoneById(boneId);
 
-    if (!boneToDelete.parentBone) {
+    const parentBone = boneToDelete.parentBone;
+    if (!parentBone) {
       throw new Error(`parentBone of bone ${boneId} is null. Bone cannot be deleted.`);
     }
 
-    const idx = boneToDelete.parentBone.childBones.indexOf(boneToDelete);
+    parentBone.removeChildBone(boneToDelete);
 
-    const allChildren = boneToDelete.getAllChildBones();
-
-    boneToDelete.parentBone.childBones.splice(idx, 1);
-    boneToDelete.parentBone = null;
-
-    //TODO: Clean up transforms.
-    for (const bone of allChildren) {
+    for (const bone of boneToDelete.getAllChildBones()) {
       for (const stage of state.stages) {
         for (const frame of stage.frames) {
           for (let i = frame.boneTransforms.length; i-- > 0; ) {
@@ -101,9 +96,7 @@ const mutations = {
       bone.parentBone = null;
     }
 
-    if (state.selectedBone.id === boneId) {
-      state.selectedBone = null;
-    }
+    state.selectedBone = parentBone;
   },
   [Types.SELECT_STAGE](state, stageId) {
     state.selectedStage = this.getters.getStageById(stageId);
@@ -130,13 +123,16 @@ const mutations = {
     bone.color = payload.newColor;
   },
   [Types.UPDATE_SELECTED_BONE_TRANSFORM_X_POSITION](state, payload) {
-    state.selectedStage.currentFrame.getBoneTransform(state.selectedBone).position.x = payload.x;
+    const boneTransform = state.selectedStage.currentFrame.getBoneTransform(state.selectedBone);
+    boneTransform.position.x = payload.x;
   },
   [Types.UPDATE_SELECTED_BONE_TRANSFORM_Y_POSITION](state, payload) {
-    state.selectedStage.currentFrame.getBoneTransform(state.selectedBone).position.y = payload.y;
+    const boneTransform = state.selectedStage.currentFrame.getBoneTransform(state.selectedBone);
+    boneTransform.position.y = payload.y;
   },
   [Types.UPDATE_SELECTED_BONE_TRANSFORM_ROTATION](state, payload) {
-    state.selectedStage.currentFrame.getBoneTransform(state.selectedBone).rotation = payload.rotation;
+    const boneTransform = state.selectedStage.currentFrame.getBoneTransform(state.selectedBone);
+    boneTransform.rotation = payload.rotation;
   }
 };
 

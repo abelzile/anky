@@ -1,3 +1,4 @@
+import * as MathUtils from '../util/math-utils';
 import Vector from '../vector';
 
 export default class BoneTransform {
@@ -7,6 +8,20 @@ export default class BoneTransform {
     }
     this.bone = bone;
     this.position = position;
-    this.rotation = rotation;
+    this.position.cb = () => this.applyToBone();
+    this._rotation = rotation;
+  }
+
+  get rotation() { return this._rotation; }
+  set rotation(value) {
+    this._rotation = value;
+    this.applyToBone();
+  }
+
+  applyToBone() {
+    const pixiBone = this.bone.pixiBone;
+    pixiBone.position.x = this.position.x;
+    pixiBone.position.y = this.position.y;
+    pixiBone.rotation = MathUtils.degreesToRadians(this._rotation);
   }
 }

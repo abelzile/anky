@@ -6,16 +6,16 @@
       <label>Position</label>
       <div class="form-group">
         <label for="xPosition">x</label>
-        <input id="xPosition" type="number" v-model="x" class="num-value"
+        <input id="xPosition" type="number" v-model.number="x" class="num-value"
                :disabled="!isBoneTransformSelected"/>
         <label for="yPosition">y</label>
-        <input id="yPosition" type="number" v-model="y" class="num-value"
+        <input id="yPosition" type="number" v-model.number="y" class="num-value"
                :disabled="!isBoneTransformSelected"/>
       </div>
 
       <div class="form-group">
         <label for="rotation" class="top-label">Rotation</label>
-        <input id="rotation" type="number" min="0" max="360" v-model="rotation"
+        <input id="rotation" type="number" min="0" max="360" v-model.number="rotation"
                class="num-value"
                :disabled="!isBoneTransformSelected"/>
       </div>

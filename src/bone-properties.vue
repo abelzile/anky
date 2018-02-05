@@ -10,7 +10,7 @@
         </div>
         <div class="control-box">
           <label for="boneLength" class="top-label">Length</label>
-          <input id="boneLength" type="number" v-model="boneLength"
+          <input id="boneLength" type="number" v-model.number="boneLength"
                  class="num-value"
                  :disabled="!isBoneSelected"/>
         </div>
@@ -27,7 +27,6 @@
 <script>
   import * as Types from './store/mutation-types';
   import * as ColorUtils from './util/color-utils';
-
 
   export default {
     name: 'boneProperties',
