@@ -1,11 +1,11 @@
 <template>
   <div>
-    <div id="z">
-      <div id="lbl">Zoom</div>
-      <button class="zoom-button" type="button" v-on:click="increaseZoom">+
+    <div class="zoom">
+      <div class="zoom__lbl">Zoom</div>
+      <button class="zoom__button" type="button" v-on:click="increaseZoom">+
       </button>
-      <span id="txt">{{zoom}}</span>
-      <button class="zoom-button" type="button" v-on:click="decreaseZoom">-</button>
+      <span class="zoom__txt">{{zoom}}</span>
+      <button class="zoom__button" type="button" v-on:click="decreaseZoom">-</button>
     </div>
   </div>
 </template>
@@ -35,26 +35,26 @@
   };
 </script>
 <style scoped>
-  #z {
+  .zoom {
     background-color: #002b36;
     border-radius: 3px;
     padding: 3px;
   }
 
-  #lbl {
+  .zoom__lbl {
     color: #93a1a1;
     font-weight: bold;
     text-align: center;
   }
 
-  #txt {
+  .zoom__txt {
     color: #93a1a1;
     display: inline-block;
     text-align: center;
     width: 40px;
   }
 
-  .zoom-button {
+  .zoom__button {
     background-color: #eeeeee;
     border-radius: 50%;
     border: none;

@@ -6,13 +6,10 @@
   </div>
 </template>
 <script>
-  import * as Const from './const';
   import * as PIXI from 'pixi.js';
   import Vue from 'vue';
-  import Key from './key';
   import stages from './stages.vue';
   import zoom from './zoom.vue';
-  import * as MutationTypes from './store/mutation-types';
 
   export default {
     name: 'editor',
@@ -23,12 +20,15 @@
     props: {
       model: Object
     },
+    $_renderer: new PIXI.WebGLRenderer({
+      backgroundColor: 0x073642,
+      autoResize: true
+    }),
+    $_rootContainer: new PIXI.Container(),
+    $_bgContainer: null,
+    $_boneContainer: new PIXI.Container(),
     data() {
       return {
-        renderer: null,
-        rootContainer: null,
-        bgContainer: null,
-        boneContainer: null,
         /*spaceKey: null,*/
         mouseCoordsOld: [-1, -1],
         mouseCoords: [-1, -1],
@@ -65,12 +65,12 @@
         if (!this.invalidated) {
           return;
         }
-        this.renderer.render(this.rootContainer);
+        this.$options.$_renderer.render(this.$options.$_rootContainer);
 
         this.invalidated = false;
       },
       changeZoom(zoom) {
-        this.rootContainer.scale.set(zoom, zoom);
+        this.$options.$_rootContainer.scale.set(zoom, zoom);
         this.invalidate();
         this.redraw();
       },
@@ -79,8 +79,8 @@
           const xDiff = this.mouseCoordsOld[0] - this.mouseCoords[0];
           const yDiff = this.mouseCoordsOld[1] - this.mouseCoords[1];
 
-          this.rootContainer.position.x += xDiff;
-          this.rootContainer.position.y += yDiff;
+          this.$options.$_rootContainer.position.x += xDiff;
+          this.$options.$_rootContainer.position.y += yDiff;
 
           this.invalidate();
         }
@@ -88,10 +88,7 @@
         this.redraw();*/
       },
       _drawRect(x, y, width, height, fillColor, g) {
-        g.lineStyle(0);
-        g.beginFill(fillColor);
-        g.drawRect(x, y, width, height);
-        g.endFill();
+        g.lineStyle(0).beginFill(fillColor).drawRect(x, y, width, height).endFill();
       },
       _createBackground() {
         const TILE_SIZE = 32;
@@ -118,74 +115,41 @@
           }
         }
 
-        g.lineStyle(1, 0x002b36);
-        g.moveTo(0, 0);
-        g.lineTo(TILE_SIZE * TILE_COUNT, 0);
-        g.moveTo(0, 0);
-        g.lineTo(0, TILE_SIZE * TILE_COUNT);
-        g.moveTo(0, 0);
-        g.lineTo(-TILE_SIZE * TILE_COUNT, 0);
-        g.moveTo(0, 0);
-        g.lineTo(0, -TILE_SIZE * TILE_COUNT);
-        g.drawRect(-TILE_SIZE * TILE_COUNT, -TILE_SIZE * TILE_COUNT, TILE_SIZE * TILE_COUNT * 2, TILE_SIZE * TILE_COUNT * 2);
+        g.lineStyle(1, 0x002b36)
+          .moveTo(0, 0)
+          .lineTo(TILE_SIZE * TILE_COUNT, 0)
+          .moveTo(0, 0)
+          .lineTo(0, TILE_SIZE * TILE_COUNT)
+          .moveTo(0, 0)
+          .lineTo(-TILE_SIZE * TILE_COUNT, 0)
+          .moveTo(0, 0)
+          .lineTo(0, -TILE_SIZE * TILE_COUNT)
+          .drawRect(-TILE_SIZE * TILE_COUNT, -TILE_SIZE * TILE_COUNT, TILE_SIZE * TILE_COUNT * 2, TILE_SIZE * TILE_COUNT * 2);
 
         return bgContainer;
       },
       _refreshBoneGraphics(mutation, state) {
-        //this.boneContainer.removeChildren();
-        //this.boneContainer.addChild(this.model.rootBone.pixiBone);
-
         this.invalidate();
         this.redraw();
-      },
-      _updateBoneGraphics(bone) {
-        /*const pixiBone = bone.pixiBone;
-        this.boneContainer.addChild(pixiBone);
-        const currentFrame = this.model.selectedStage.currentFrame;
-        const transform = currentFrame.getBoneTransform(bone);
-        bone.applyTransform(transform);
-
-        for (const childBone of bone.childBones) {
-
-
-
-        }*/
-
-        /*const transforms = [];
-        const currentFrame = this.model.selectedStage.currentFrame;
-        let currentBone = bone;
-
-        while (currentBone) {
-          const transform = currentFrame.getBoneTransform(currentBone);
-
-          transforms.push(transform);
-
-          currentBone = currentBone.parentBone;
-        }
-
-        bone.applyTransforms(transforms);*/
       }
     },
     mounted() {
-      const renderer = new PIXI.WebGLRenderer({
-        backgroundColor: 0x073642,
-        autoResize: true
-      });
+      const renderer = this.$options.$_renderer;
+
       const editor = document.getElementById('editor');
       editor.appendChild(renderer.view);
       renderer.view.style.position = 'absolute';
       renderer.view.style.display = 'block';
       renderer.resize(editor.offsetWidth, editor.offsetHeight);
 
-      this.bgContainer = this._createBackground();
-      this.boneContainer = new PIXI.Container();
-      this.rootContainer = new PIXI.Container();
-      this.rootContainer.position.x = renderer.width / 2;
-      this.rootContainer.position.y = renderer.height / 2;
-      this.rootContainer.addChild(this.bgContainer);
-      this.rootContainer.addChild(this.boneContainer);
+      this.$options.$_bgContainer = this._createBackground();
 
-      this.renderer = renderer;
+      const boneContainer = this.$options.$_boneContainer;
+      const rootContainer = this.$options.$_rootContainer;
+      rootContainer.position.x = renderer.width / 2;
+      rootContainer.position.y = renderer.height / 2;
+      rootContainer.addChild(this.$options.$_bgContainer);
+      rootContainer.addChild(boneContainer);
 
       //FIXME: can't capture keys and cancel events like this.
       /*this.spaceKey = new Key(32);
@@ -194,7 +158,7 @@
 
       this.$store.subscribe(this._refreshBoneGraphics);
 
-      this.rootContainer.addChild(this.model.rootBone.pixiBone);
+      boneContainer.addChild(this.model.rootBone.pixiBone);
 
       Vue.nextTick(() => {
         this._refreshBoneGraphics();
@@ -205,22 +169,22 @@
 <style scoped>
   #editor {
     position: absolute;
-    top:0;
+    top: 0;
     left: 0;
     right: 0;
     bottom: 0;
     margin: 0;
-    padding:0;
+    padding: 0;
   }
 
   #zoomer {
-    position:absolute;
+    position: absolute;
     bottom: 3px;
     left: 3px;
   }
 
   #stages {
-    position:absolute;
+    position: absolute;
     top: 3px;
     left: 3px;
   }

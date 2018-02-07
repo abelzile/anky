@@ -12,6 +12,7 @@
           <label for="boneLength" class="top-label">Length</label>
           <input id="boneLength" type="number" v-model.number="boneLength"
                  class="num-value"
+                 min="0"
                  :disabled="!isBoneSelected"/>
         </div>
         <div class="control-box">

@@ -1,9 +1,9 @@
 <template>
   <li class="item">
     <div class="item-outer">
-      <span class="expander"
-            v-if="isFolder"
-            @click="toggle">{{(model.childBones.length === 0) ? '&nbsp;' : (open ? '&ndash;' : '+')}}
+      <span
+          :class="[expanderClass, (model.childBones.length === 0) ? expanderDisabledClass : expanderEnabledClass]"
+          @click="toggle">{{(model.childBones.length === 0) ? '&nbsp;' : (open ? '&ndash;' : '+')}}
       </span>
       <span
           :class="[itemTextClass, (isSelectedBone) ? selectedClass : unselectedClass]"
@@ -52,7 +52,10 @@
         open: false,
         itemTextClass: 'item-text',
         selectedClass: 'selected',
-        unselectedClass: 'unselected'
+        unselectedClass: 'unselected',
+        expanderClass: 'expander',
+        expanderDisabledClass: 'expander--disabled',
+        expanderEnabledClass: 'expander--enabled'
       }
     },
     computed: {
@@ -121,7 +124,7 @@
     border: none;
     padding: 3px;
     margin-right: 3px;
-    margin-left: 3px;
+    /*margin-left: 3px;*/
   }
 
   .selected {
@@ -139,10 +142,21 @@
   }
 
   .expander {
-    cursor: pointer;
+    display: inline-block;
+
     font-weight: bold;
     font-size: 150%;
+    text-align: center;
     vertical-align: middle;
+    width: 1em;
+  }
+
+  .expander--enabled {
+    cursor: pointer;
+  }
+
+  .expander--disabled {
+    cursor: default;
   }
 
   .icons {

@@ -1,8 +1,6 @@
-import * as generateUuidV4 from 'uuid/v4';
 import * as PIXI from 'pixi.js';
-import * as MathUtils from '../util/math-utils';
+import * as generateUuidV4 from 'uuid/v4';
 import * as ColorUtils from '../util/color-utils';
-import Vector from '../vector';
 
 export default class Bone {
   constructor(name = '', length = 0) {
@@ -15,19 +13,23 @@ export default class Bone {
     this.parentBone = null;
     this.childBones = [];
     this.pixiBone = new PIXI.Graphics(true);
-    this._updatePixiBone();
+    this._redraw();
   }
 
   get length() { return this._length; }
   set length(val) {
-    this._length = val;
-    this._updatePixiBone();
+    if (val < 0) {
+      this._length = 0;
+    } else {
+      this._length = val;
+    }
+    this._redraw();
   }
 
   get color() { return this._color; }
   set color(val) {
     this._color = val;
-    this._updatePixiBone();
+    this._redraw();
   }
 
   addChildBone(childBone) {
@@ -72,13 +74,25 @@ export default class Bone {
     return children;
   }
 
-  _updatePixiBone() {
-    this.pixiBone.clear().lineStyle(1, this._color, 1);
+  _redraw() {
+    this.pixiBone
+      .clear()
+      .lineStyle(1, 0x000000)
+      .beginFill(this._color);
 
-    if (this._length < 4) {
-      this.pixiBone.drawCircle(0, 0, 3);
+    if (this._length <= 1) {
+      this.pixiBone.drawCircle(0, 0, 1);
+    } else if (this._length < 4) {
+      this.pixiBone.drawCircle(0, 0, this._length);
     } else {
-      this.pixiBone.moveTo(0, 0).lineTo(this._length, 0);
+      const baseLen = 3 + Math.ceil(this._length / 100);
+
+      this.pixiBone
+        .moveTo(0, 0)
+        .lineTo(0, -baseLen)
+        .lineTo(this._length, 0)
+        .lineTo(0, baseLen)
+        .lineTo(0, 0)
     }
 
     this.pixiBone.endFill();
