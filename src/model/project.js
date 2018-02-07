@@ -6,7 +6,16 @@ export default class Project {
     this.stages = [];
     this.rootBone = null;
     this.selectedStage = null;
-    this.selectedBone = null;
+    this._selectedBone = null;
+  }
+
+  get selectedBone() { return this._selectedBone; }
+  set selectedBone(value) {
+    if (this._selectedBone) {
+      this._selectedBone.isHighlighted = false;
+    }
+    this._selectedBone = value;
+    this._selectedBone.isHighlighted = true;
   }
 
   getBoneById(id, startBone = this.rootBone) {

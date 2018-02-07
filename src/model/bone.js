@@ -1,35 +1,48 @@
 import * as PIXI from 'pixi.js';
 import * as generateUuidV4 from 'uuid/v4';
 import * as ColorUtils from '../util/color-utils';
+import * as MathUtils from '../util/math-utils';
 
 export default class Bone {
   constructor(name = '', length = 0) {
     this.id = generateUuidV4();
     this.name = name;
-    this._length = length; // length of the bone
+    this._length = length;
     const color = ColorUtils.genRandomColor();
     this._color = ColorUtils.rgbToHex(color.r, color.g, color.b);
     this.slots = [];
     this.parentBone = null;
     this.childBones = [];
     this.pixiBone = new PIXI.Graphics(true);
-    this._redraw();
+    this._borderColor = 0x000000;
+    this._isHighlighted = false;
+
+    this.redraw();
   }
 
   get length() { return this._length; }
-  set length(val) {
-    if (val < 0) {
-      this._length = 0;
-    } else {
-      this._length = val;
-    }
-    this._redraw();
+  set length(value) {
+    this._length = MathUtils.clamp(value, 0, 9999);
+    this.redraw();
   }
 
   get color() { return this._color; }
-  set color(val) {
-    this._color = val;
-    this._redraw();
+  set color(value) {
+    this._color = value;
+    this.redraw();
+  }
+
+  get isHighlighted() { return this._isHighlighted; }
+  set isHighlighted(value) {
+    this._isHighlighted = value;
+
+    if (value) {
+      this._borderColor = 0xffffff;
+    } else {
+      this._borderColor = 0x000000;
+    }
+
+    this.redraw();
   }
 
   addChildBone(childBone) {
@@ -50,9 +63,10 @@ export default class Bone {
     if (!childBone) {
       throw new Error('childBone has no value.');
     }
-    const index = childBone.parentBone.childBones.indexOf(childBone);
-    childBone.parentBone.childBones.splice(index, 1);
-    childBone.parentBone.pixiBone.removeChild(childBone.pixiBone);
+    const parentBone = childBone.parentBone;
+    const index = parentBone.childBones.indexOf(childBone);
+    parentBone.childBones.splice(index, 1);
+    parentBone.pixiBone.removeChild(childBone.pixiBone);
     childBone.parentBone = null;
   }
 
@@ -74,10 +88,10 @@ export default class Bone {
     return children;
   }
 
-  _redraw() {
+  redraw() {
     this.pixiBone
       .clear()
-      .lineStyle(1, 0x000000)
+      .lineStyle(1, this._borderColor)
       .beginFill(this._color);
 
     if (this._length <= 1) {
