@@ -26,11 +26,15 @@
 </template>
 
 <script>
+  import featherIconBtn from './tool-icon-btn.vue';
   import * as Types from './store/mutation-types';
   import * as ColorUtils from './util/color-utils';
 
   export default {
     name: 'boneProperties',
+    components: {
+      featherIconBtn
+    },
     props: {
       model: Object
     },

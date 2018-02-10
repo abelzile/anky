@@ -1,14 +1,13 @@
 <template>
-  <div>
-    <div class="zoom">
-      <div class="zoom__lbl">Zoom</div>
-      <button class="zoom__button" type="button" v-on:click="increaseZoom">+
-      </button>
-      <span class="zoom__txt">{{zoom}}</span>
-      <button class="zoom__button" type="button" v-on:click="decreaseZoom">-</button>
-    </div>
+  <div class="zoom">
+    <div class="zoom__lbl">Zoom</div>
+    <button class="zoom__button" type="button" v-on:click="increaseZoom">+
+    </button>
+    <span class="zoom__txt">{{zoom}}</span>
+    <button class="zoom__button" type="button" v-on:click="decreaseZoom">-</button>
   </div>
 </template>
+
 <script>
   export default {
     data: function () {
@@ -34,6 +33,7 @@
     }
   };
 </script>
+
 <style scoped>
   .zoom {
     background-color: #002b36;

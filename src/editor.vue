@@ -3,6 +3,7 @@
     <div id="editor" v-on:mousemove="mouseMove"></div>
     <zoom id="zoomer" v-on:change-zoom="changeZoom"></zoom>
     <stages id="stages" :model="stages"></stages>
+    <tool-palette id="palette"></tool-palette>
   </div>
 </template>
 <script>
@@ -10,12 +11,14 @@
   import Vue from 'vue';
   import stages from './stages.vue';
   import zoom from './zoom.vue';
+  import toolPalette from './tool-palette.vue';
 
   export default {
     name: 'editor',
     components: {
       zoom,
-      stages
+      stages,
+      toolPalette
     },
     props: {
       model: Object
@@ -160,6 +163,10 @@
 
       boneContainer.addChild(this.model.rootBone.pixiBone);
 
+      const stagesEl = document.getElementById('stages');
+      const y = stagesEl.offsetTop + stagesEl.offsetHeight;
+      document.getElementById('palette').style.top = (y + 3) + 'px';
+
       Vue.nextTick(() => {
         this._refreshBoneGraphics();
       });
@@ -186,6 +193,12 @@
   #stages {
     position: absolute;
     top: 3px;
+    left: 3px;
+  }
+
+  #palette {
+    position: absolute;
+    top: 100px;
     left: 3px;
   }
 </style>
