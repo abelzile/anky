@@ -5,6 +5,8 @@
 <script>
   import Feather from './vendor/feather.min';
 
+  const SVG_STYLES = "display:block;margin-left:auto;margin-right:auto;";
+
   export default {
     name: 'tool-icon-btn',
     props: {
@@ -13,7 +15,6 @@
     },
     computed: {
       iconSvg() {
-        const SVG_STYLES = "display:block;margin-left:auto;margin-right:auto;";
         const parser = new DOMParser();
         const html = parser.parseFromString(Feather.icons[this.icon].toSvg(), "text/html");
         const svgTags = html.getElementsByTagName('svg');

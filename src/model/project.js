@@ -18,6 +18,13 @@ export default class Project {
     this._selectedBone.isHighlighted = true;
   }
 
+  getAllBones() {
+    const bones = this.rootBone.getAllChildBones();
+    bones.unshift(this.rootBone);
+
+    return bones;
+  }
+
   getBoneById(id, startBone = this.rootBone) {
     const stack = [];
     let bone = null;

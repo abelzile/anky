@@ -3,15 +3,17 @@
     <div id="editor" v-on:mousemove="mouseMove"></div>
     <zoom id="zoomer" v-on:change-zoom="changeZoom"></zoom>
     <stages id="stages" :model="stages"></stages>
-    <tool-palette id="palette"></tool-palette>
+    <tool-palette id="palette" @selected-tool-changed="updateTool"></tool-palette>
   </div>
 </template>
 <script>
   import * as PIXI from 'pixi.js';
   import Vue from 'vue';
+  import * as Const from './const';
   import stages from './stages.vue';
-  import zoom from './zoom.vue';
+  import * as Types from './store/mutation-types';
   import toolPalette from './tool-palette.vue';
+  import zoom from './zoom.vue';
 
   export default {
     name: 'editor',
@@ -35,7 +37,7 @@
         /*spaceKey: null,*/
         mouseCoordsOld: [-1, -1],
         mouseCoords: [-1, -1],
-        invalidated: false
+        selectedToolId: ''
       }
     },
     computed: {
@@ -61,21 +63,45 @@
 
         this._handleInput();
       },
-      invalidate() {
-        this.invalidated = true;
-      },
       redraw() {
-        if (!this.invalidated) {
-          return;
-        }
         this.$options.$_renderer.render(this.$options.$_rootContainer);
-
-        this.invalidated = false;
       },
       changeZoom(zoom) {
         this.$options.$_rootContainer.scale.set(zoom, zoom);
-        this.invalidate();
         this.redraw();
+      },
+      updateTool(toolId) {
+
+        if (!toolId) {
+          if (!this.selectedToolId) {
+            return;
+          }
+          toolId = this.selectedToolId;
+        }
+
+        console.log('updateTool: ' + toolId);
+
+        const allBones = this.model.getAllBones();
+        for (const bone of allBones) {
+          bone.pixiBone.interactive = false;
+          bone.pixiBone.removeAllListeners('click');
+        }
+
+        switch (toolId) {
+          case Const.TOOL_TYPE.SELECT:
+            for (const bone of allBones) {
+              bone.pixiBone.interactive = true;
+              bone.pixiBone.on('click', (e) => {
+                console.log('click ' + bone.id);
+                e.stopPropagation();
+                this.$store.commit(Types.SELECT_BONE, bone.id);
+              });
+            }
+
+            break;
+        }
+
+        this.selectedToolId = toolId;
       },
       _handleInput() {
         /*if (this.spaceKey.isDown) {
@@ -132,12 +158,13 @@
         return bgContainer;
       },
       _refreshBoneGraphics(mutation, state) {
-        this.invalidate();
+        this.updateTool();
         this.redraw();
       }
     },
     mounted() {
       const renderer = this.$options.$_renderer;
+      renderer.plugins.interaction.autoPreventDefault = true;
 
       const editor = document.getElementById('editor');
       editor.appendChild(renderer.view);

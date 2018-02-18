@@ -5,19 +5,19 @@
     </div>
     <tool-icon-btn
         class="palette__btn"
-        :class="{ 'palette__btn--active' : (currentToolId === 'select') }"
+        :class="{ 'palette__btn--active' : (currentToolId === TOOL_TYPE.SELECT) }"
         icon="pointer"
         id="select"
         @click="setTool"></tool-icon-btn>
     <tool-icon-btn
         class="palette__btn"
-        :class="{ 'palette__btn--active': (currentToolId === 'move') }"
+        :class="{ 'palette__btn--active': (currentToolId === TOOL_TYPE.MOVE) }"
         icon="move"
         id="move"
         @click="setTool"></tool-icon-btn>
     <tool-icon-btn
         class="palette__btn"
-        :class="{ 'palette__btn--active': (currentToolId === 'rotate') }"
+        :class="{ 'palette__btn--active': (currentToolId === TOOL_TYPE.ROTATE) }"
         icon="rotate-cw"
         id="rotate"
         @click="setTool"></tool-icon-btn>
@@ -25,13 +25,16 @@
 </template>
 
 <script>
+  import * as Const from './const';
+  import Vue from 'vue';
   import toolIconBtn from './tool-icon-btn.vue';
 
   export default {
     name: 'tool-palette',
     data() {
       return {
-        currentToolId: null
+        currentToolId: '',
+        TOOL_TYPE: Const.TOOL_TYPE
       }
     },
     components: {
@@ -43,10 +46,13 @@
           return;
         }
         this.currentToolId = btn;
+        this.$emit('selected-tool-changed', this.currentToolId);
       }
     },
     mounted() {
-      this.currentToolId = 'select';
+      Vue.nextTick(() => {
+        this.setTool(this.TOOL_TYPE.SELECT);
+      });
     }
   }
 </script>
