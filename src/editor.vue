@@ -3,7 +3,8 @@
     <div id="editor" v-on:mousemove="mouseMove"></div>
     <zoom id="zoomer" v-on:change-zoom="changeZoom"></zoom>
     <stages id="stages" :model="stages"></stages>
-    <tool-palette id="palette" @selected-tool-changed="updateTool"></tool-palette>
+    <tool-palette id="palette"
+                  @selected-tool-changed="updateTool"></tool-palette>
   </div>
 </template>
 <script>
@@ -84,7 +85,7 @@
         const allBones = this.model.getAllBones();
         for (const bone of allBones) {
           bone.pixiBone.interactive = false;
-          bone.pixiBone.removeAllListeners('click');
+          bone.pixiBone.removeAllListeners();
         }
 
         switch (toolId) {
@@ -92,10 +93,45 @@
             for (const bone of allBones) {
               bone.pixiBone.interactive = true;
               bone.pixiBone.on('click', (e) => {
-                console.log('click ' + bone.id);
                 e.stopPropagation();
                 this.$store.commit(Types.SELECT_BONE, bone.id);
               });
+            }
+
+            break;
+
+          case Const.TOOL_TYPE.MOVE:
+            for (const bone of allBones) {
+              const pixiBone = bone.pixiBone;
+              pixiBone.interactive = true;
+
+              const onStartDrag = (e) => {
+                e.stopPropagation();
+                this.$store.commit(Types.SELECT_BONE, bone.id);
+
+                pixiBone.data = e.data;
+                pixiBone.dragging = true;
+              };
+
+              const onEndDrag = () => {
+                pixiBone.dragging = false;
+                pixiBone.data = null;
+              };
+
+              const onDrag = () => {
+                if (!pixiBone.dragging) {
+                  return;
+                }
+                this.$store.commit(
+                  Types.UPDATE_SELECTED_BONE_TRANSFORM_POSITION,
+                  pixiBone.data.getLocalPosition(pixiBone.parent));
+              };
+
+              pixiBone
+                .on('mousedown', onStartDrag)
+                .on('mouseup', onEndDrag)
+                .on('mouseupoutside', onEndDrag)
+                .on('mousemove', onDrag);
             }
 
             break;
@@ -157,8 +193,29 @@
 
         return bgContainer;
       },
-      _refreshBoneGraphics(mutation, state) {
-        this.updateTool();
+      _refreshPixiBones(mutation, state) {
+        //console.log(mutation);
+
+        if (!mutation) {
+          this.redraw();
+          return;
+        }
+
+        switch (mutation.type) {
+          case Types.UPDATE_BONE_COLOR:
+          case Types.UPDATE_BONE_LENGTH:
+          case Types.UPDATE_BONE_NAME:
+          case Types.UPDATE_SELECTED_BONE_TRANSFORM_POSITION:
+          case Types.UPDATE_SELECTED_BONE_TRANSFORM_ROTATION:
+          case Types.UPDATE_SELECTED_BONE_TRANSFORM_X_POSITION:
+          case Types.UPDATE_SELECTED_BONE_TRANSFORM_Y_POSITION:
+            // don't update tool
+            break;
+          default:
+            this.updateTool();
+            break;
+        }
+
         this.redraw();
       }
     },
@@ -186,7 +243,7 @@
       this.spaceKey.press = function () {
       };*/
 
-      this.$store.subscribe(this._refreshBoneGraphics);
+      this.$store.subscribe(this._refreshPixiBones);
 
       boneContainer.addChild(this.model.rootBone.pixiBone);
 
@@ -195,7 +252,7 @@
       document.getElementById('palette').style.top = (y + 3) + 'px';
 
       Vue.nextTick(() => {
-        this._refreshBoneGraphics();
+        this._refreshPixiBones();
       });
     }
   }

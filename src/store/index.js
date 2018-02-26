@@ -122,6 +122,11 @@ const mutations = {
     const bone = this.getters.getBoneById(payload.boneId);
     bone.color = payload.newColor;
   },
+  [Types.UPDATE_SELECTED_BONE_TRANSFORM_POSITION](state, payload) {
+    const boneTransform = state.selectedStage.currentFrame.getBoneTransform(state.selectedBone);
+    boneTransform.position.x = payload.x;
+    boneTransform.position.y = payload.y;
+  },
   [Types.UPDATE_SELECTED_BONE_TRANSFORM_X_POSITION](state, payload) {
     const boneTransform = state.selectedStage.currentFrame.getBoneTransform(state.selectedBone);
     boneTransform.position.x = payload.x;
