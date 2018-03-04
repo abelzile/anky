@@ -14,7 +14,88 @@
   import stages from './stages.vue';
   import * as Types from './store/mutation-types';
   import toolPalette from './tool-palette.vue';
+  import Vector from './vector';
   import zoom from './zoom.vue';
+  import * as MathUtils from './util/math-utils';
+
+  const tools = {
+    [Const.TOOL_TYPE.SELECT](bone, store) {
+      const pixiBone = bone.pixiBone;
+      pixiBone.interactive = true;
+      pixiBone.on('click', (e) => {
+        e.stopPropagation();
+        store.commit(Types.SELECT_BONE, bone.id);
+      });
+    },
+    [Const.TOOL_TYPE.MOVE](bone, store) {
+      const pixiBone = bone.pixiBone;
+      pixiBone.interactive = true;
+
+      const onStartDrag = (e) => {
+        e.stopPropagation();
+        store.commit(Types.SELECT_BONE, bone.id);
+
+        pixiBone.data = e.data;
+        pixiBone.dragging = true;
+      };
+
+      const onEndDrag = () => {
+        pixiBone.dragging = false;
+        pixiBone.data = null;
+      };
+
+      const onDrag = () => {
+        if (!pixiBone.dragging) {
+          return;
+        }
+        store.commit(
+          Types.UPDATE_SELECTED_BONE_TRANSFORM_POSITION,
+          pixiBone.data.getLocalPosition(pixiBone.parent));
+      };
+
+      pixiBone
+        .on('mousedown', onStartDrag)
+        .on('mouseup', onEndDrag)
+        .on('mouseupoutside', onEndDrag)
+        .on('mousemove', onDrag);
+    },
+    [Const.TOOL_TYPE.ROTATE](bone, store) {
+      const pixiBone = bone.pixiBone;
+      pixiBone.interactive = true;
+
+      const onStartDrag = (e) => {
+        e.stopPropagation();
+        store.commit(Types.SELECT_BONE, bone.id);
+
+        pixiBone.data = e.data;
+        pixiBone.dragging = true;
+      };
+
+      const onEndDrag = () => {
+        pixiBone.dragging = false;
+        pixiBone.data = null;
+      };
+
+      const onDrag = (e) => {
+        if (!pixiBone.dragging) {
+          return;
+        }
+
+        const pos = pixiBone.data.getLocalPosition(pixiBone.parent);
+        const angle = MathUtils.radiansToDegrees(MathUtils.getAngle(pixiBone.position, pos));
+
+        store.commit(
+          Types.UPDATE_SELECTED_BONE_TRANSFORM_ROTATION,
+          { rotation: angle });
+      };
+
+      pixiBone
+        .on('mousedown', onStartDrag)
+        .on('mouseup', onEndDrag)
+        .on('mouseupoutside', onEndDrag)
+        .on('mousemove', onDrag);
+    }
+  };
 
   export default {
     name: 'editor',
@@ -72,7 +153,6 @@
         this.redraw();
       },
       updateTool(toolId) {
-
         if (!toolId) {
           if (!this.selectedToolId) {
             return;
@@ -80,61 +160,13 @@
           toolId = this.selectedToolId;
         }
 
-        console.log('updateTool: ' + toolId);
+        const toolFunc = tools[toolId];
 
-        const allBones = this.model.getAllBones();
-        for (const bone of allBones) {
-          bone.pixiBone.interactive = false;
-          bone.pixiBone.removeAllListeners();
-        }
-
-        switch (toolId) {
-          case Const.TOOL_TYPE.SELECT:
-            for (const bone of allBones) {
-              bone.pixiBone.interactive = true;
-              bone.pixiBone.on('click', (e) => {
-                e.stopPropagation();
-                this.$store.commit(Types.SELECT_BONE, bone.id);
-              });
-            }
-
-            break;
-
-          case Const.TOOL_TYPE.MOVE:
-            for (const bone of allBones) {
-              const pixiBone = bone.pixiBone;
-              pixiBone.interactive = true;
-
-              const onStartDrag = (e) => {
-                e.stopPropagation();
-                this.$store.commit(Types.SELECT_BONE, bone.id);
-
-                pixiBone.data = e.data;
-                pixiBone.dragging = true;
-              };
-
-              const onEndDrag = () => {
-                pixiBone.dragging = false;
-                pixiBone.data = null;
-              };
-
-              const onDrag = () => {
-                if (!pixiBone.dragging) {
-                  return;
-                }
-                this.$store.commit(
-                  Types.UPDATE_SELECTED_BONE_TRANSFORM_POSITION,
-                  pixiBone.data.getLocalPosition(pixiBone.parent));
-              };
-
-              pixiBone
-                .on('mousedown', onStartDrag)
-                .on('mouseup', onEndDrag)
-                .on('mouseupoutside', onEndDrag)
-                .on('mousemove', onDrag);
-            }
-
-            break;
+        for (const bone of this.model.getAllBones()) {
+          const pixiBone = bone.pixiBone;
+          pixiBone.interactive = false;
+          pixiBone.removeAllListeners();
+          toolFunc(bone, this.$store);
         }
 
         this.selectedToolId = toolId;
