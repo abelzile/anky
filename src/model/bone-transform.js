@@ -24,4 +24,8 @@ export default class BoneTransform {
     pixiBone.position.y = this.position.y;
     pixiBone.rotation = MathUtils.degreesToRadians(this._rotation);
   }
+
+  clone() {
+    return new BoneTransform(this.bone, this.position.clone(), this._rotation);
+  }
 }

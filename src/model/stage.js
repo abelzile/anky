@@ -2,8 +2,8 @@ import * as generateUuidV4 from 'uuid/v4';
 import * as Const from '../const';
 
 export default class Stage {
-  constructor(name, stageType = Const.STAGE_TYPE.SETUP) {
-    this.id = generateUuidV4();
+  constructor(id = generateUuidV4(), name = 'New Stage', stageType = Const.STAGE_TYPE.SETUP) {
+    this.id = id;
     this.name = name;
     this.stageType = stageType;
     this.frames = [];

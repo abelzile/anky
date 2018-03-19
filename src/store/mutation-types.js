@@ -9,3 +9,4 @@ export const UPDATE_SELECTED_BONE_TRANSFORM_X_POSITION = 'updateSelectedBoneTran
 export const UPDATE_SELECTED_BONE_TRANSFORM_Y_POSITION = 'updateSelectedBoneTransformYPosition';
 export const UPDATE_SELECTED_BONE_TRANSFORM_ROTATION = 'updateSelectedBoneTransformRotation';
 export const UPDATE_BONE_COLOR = 'updateBoneColor';
+export const ADD_STAGE = 'addStage';

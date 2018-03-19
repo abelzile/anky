@@ -22,4 +22,8 @@ export default class Vector {
       this.cb();
     }
   }
+
+  clone() {
+    return new Vector(this._x, this._y);
+  }
 }

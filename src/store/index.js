@@ -8,18 +8,19 @@ import Project from '../model/project';
 import Stage from '../model/stage';
 import Vector from '../vector';
 import * as Types from './mutation-types';
+import * as generateUuidV4 from 'uuid/v4';
 
 Vue.use(Vuex);
 
 const project = new Project('test project');
-const setupStage = new Stage('Setup');
+const setupStage = new Stage(Const.SETUP_STAGE_ID, 'Setup');
 const setupFrame = new Frame();
 setupStage.frames.push(setupFrame);
 project.stages.push(setupStage);
 project.selectedStage = setupStage;
 
 
-project.stages.push(new Stage('Test', Const.STAGE_TYPE.ANIMATION));
+//project.stages.push(new Stage('Test', Const.STAGE_TYPE.ANIMATION));
 
 
 const rootBone = new Bone();
@@ -41,11 +42,21 @@ setupFrame.boneTransforms.push(childBone2TransSetup);
 childBone1.addChildBone(childBone2);*/
 
 const getters = {
-  getBoneById: state => id => {
-    return state.getBoneById(id);
+  getBoneById: state => {
+    return id => {
+      return state.getBoneById(id);
+    };
   },
   getStageById: state => id => {
     return state.getStageById(id);
+  }
+};
+
+const actions = {
+  addStage({ commit, state }, payload) {
+    const newId = generateUuidV4();
+    commit(Types.ADD_STAGE, { id: newId, name: payload.name, stageType: payload.stageType });
+    commit(Types.SELECT_STAGE, newId);
   }
 };
 
@@ -138,11 +149,23 @@ const mutations = {
   [Types.UPDATE_SELECTED_BONE_TRANSFORM_ROTATION](state, payload) {
     const boneTransform = state.selectedStage.currentFrame.getBoneTransform(state.selectedBone);
     boneTransform.rotation = payload.rotation;
+  },
+  [Types.ADD_STAGE](state, payload) {
+    const setupStage = state.getStageById(Const.SETUP_STAGE_ID);
+
+    if (!setupStage) {
+      throw new Error(`The Setup stage couldn't be found.`);
+    }
+
+    const newStage = new Stage(payload.id, payload.name, payload.stageType);
+    newStage.frames = setupStage.frames.map(f => f.clone());
+    state.stages.push(newStage);
   }
 };
 
 export default new Vuex.Store({
   state: project,
   getters,
+  actions,
   mutations
 });

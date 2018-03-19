@@ -1,10 +1,15 @@
 <template>
   <div>
     <div id="editor" v-on:mousemove="mouseMove"></div>
-    <zoom id="zoomer" v-on:change-zoom="changeZoom"></zoom>
-    <stages id="stages" :model="stages"></stages>
+    <zoom id="zoomer" class="zoomer" v-bind:class="zoomerCssClass"
+          v-on:change-zoom="changeZoom"></zoom>
+    <stages id="stages" :model="stages"
+            @selected-stage-changed="toggleTimeline"></stages>
     <tool-palette id="palette"
                   @selected-tool-changed="updateTool"></tool-palette>
+    <timeline id="timeline" class="timeline"
+              v-bind:class="{ 'timeline--hidden': !isTimelineVisible }"
+              :model="project"></timeline>
   </div>
 </template>
 <script>
@@ -14,9 +19,9 @@
   import stages from './stages.vue';
   import * as Types from './store/mutation-types';
   import toolPalette from './tool-palette.vue';
-  import Vector from './vector';
-  import zoom from './zoom.vue';
   import * as MathUtils from './util/math-utils';
+  import zoom from './zoom.vue';
+  import timeline from './timeline.vue';
 
   const tools = {
     [Const.TOOL_TYPE.SELECT](bone, store) {
@@ -81,12 +86,12 @@
           return;
         }
 
-        const pos = pixiBone.data.getLocalPosition(pixiBone.parent);
-        const angle = MathUtils.radiansToDegrees(MathUtils.getAngle(pixiBone.position, pos));
+        const angle = MathUtils.radiansToDegrees(
+          MathUtils.getAngle(pixiBone.position, pixiBone.data.getLocalPosition(pixiBone.parent)));
 
         store.commit(
           Types.UPDATE_SELECTED_BONE_TRANSFORM_ROTATION,
-          { rotation: angle });
+          {rotation: angle});
       };
 
       pixiBone
@@ -102,7 +107,8 @@
     components: {
       zoom,
       stages,
-      toolPalette
+      toolPalette,
+      timeline
     },
     props: {
       model: Object
@@ -123,8 +129,25 @@
       }
     },
     computed: {
+      project() {
+        return this.model;
+      },
       stages() {
         return this.model.stages;
+      },
+      isTimelineVisible() {
+        return this.$store.state.selectedStage.stageType === Const.STAGE_TYPE.ANIMATION;
+      },
+      zoomerCssClass() {
+        const zoomerMode = (this.$store.state.selectedStage.stageType === Const.STAGE_TYPE.ANIMATION)
+          ? 'zoomer--mode-animate'
+          : 'zoomer--mode-setup';
+
+        console.log(zoomerMode);
+
+        return {
+          [zoomerMode]: true
+        };
       }
     },
     methods: {
@@ -170,6 +193,11 @@
         }
 
         this.selectedToolId = toolId;
+      },
+      toggleTimeline(stageId) {
+        const stage = this.$store.state.getStageById(stageId);
+
+        console.log(stage.name);
       },
       _handleInput() {
         /*if (this.spaceKey.isDown) {
@@ -300,9 +328,18 @@
     padding: 0;
   }
 
-  #zoomer {
+  .zoomer {
     position: absolute;
+    padding: 3px;
+  }
+
+  .zoomer--mode-setup {
     bottom: 3px;
+    left: 3px;
+  }
+
+  .zoomer--mode-animate {
+    bottom: 203px;
     left: 3px;
   }
 
@@ -316,5 +353,19 @@
     position: absolute;
     top: 100px;
     left: 3px;
+  }
+
+  .timeline {
+    position: absolute;
+    height: 200px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  .timeline--hidden {
+    display: none;
   }
 </style>

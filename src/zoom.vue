@@ -38,7 +38,6 @@
   .zoom {
     background-color: #002b36;
     border-radius: 3px;
-    padding: 3px;
   }
 
   .zoom__lbl {
